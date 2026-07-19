@@ -116,8 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const ageVal = urlParams.get('age');
             const weightVal = urlParams.get('weight');
             const heightVal = urlParams.get('height');
-            const bfVal = urlParams.get('bf');
-            const actVal = urlParams.get('activity');
+            const bfVal = urlParams.get('bf') || urlParams.get('bodyfat');
+            const actVal = urlParams.get('activity') || urlParams.get('act');
 
             // Select gender radio
             const genderInput = document.querySelector(`input[name="gender"][value="${genderVal}"]`);
@@ -131,7 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (ageVal) document.getElementById('age').value = ageVal;
             if (weightVal) document.getElementById('weight').value = weightVal;
             if (heightVal) document.getElementById('height').value = heightVal;
-            if (bfVal) document.getElementById('bodyfat').value = bfVal;
+            if (bfVal !== null && bfVal !== undefined && bfVal !== '') {
+                document.getElementById('bodyfat').value = bfVal;
+            } else {
+                document.getElementById('bodyfat').value = '';
+            }
             if (actVal) document.getElementById('activity').value = actVal;
 
             calculateAndDisplay();
