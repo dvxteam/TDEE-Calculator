@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องคำนวณ TDEE & สารอาหารสำหรับลูกเทรน | Coach TDEE Pro</title>
+    <meta name="description" content="คำนวณหาค่า BMR, TDEE, ดัชนีมวลกาย (BMI), น้ำหนักที่เหมาะสม และสัดส่วนสารอาหาร (Macronutrients) เพื่อส่งมอบแผนสุขภาพที่ดีที่สุดให้กับลูกเทรนของคุณ">
+    
+    <!-- Google Fonts: Inter & Sriracha or Prompt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons (Lucide Icons via CDN) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-decor">
+        <div class="glow-sphere sphere-1"></div>
+        <div class="glow-sphere sphere-2"></div>
+    </div>
+
+    <header class="app-header">
+        <div class="container">
+            <div class="logo">
+                <i data-lucide="activity" class="logo-icon"></i>
+                <div class="logo-text">
+                    <h1>Coach TDEE <span>Pro</span></h1>
+                    <p>ระบบคำนวณพลังงานและสารอาหารสำหรับลูกเทรน</p>
+                </div>
+            </div>
+            <div class="header-action">
+                <button id="theme-toggle" class="btn-icon" title="เปลี่ยนธีม">
+                    <i data-lucide="sun"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content container">
+        <div class="inputs-grid">
+            <section class="calculator-section">
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <i data-lucide="calculator" class="text-primary"></i>
+                        <h2>ระบุข้อมูลร่างกายลูกเทรน <span class="subtitle">/ Trainee's Stats</span></h2>
+                    </div>
+                    <form id="tdee-form">
+                        <div class="form-grid">
+                            <!-- Gender selection -->
+                            <div class="form-group col-span-2">
+                                <label>เพศ / Gender</label>
+                                <div class="gender-radio-group">
+                                    <label class="gender-label active">
+                                        <input type="radio" name="gender" value="male" checked>
+                                        <i data-lucide="mars"></i> ชาย / Male
+                                    </label>
+                                    <label class="gender-label">
+                                        <input type="radio" name="gender" value="female">
+                                        <i data-lucide="venus"></i> หญิง / Female
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Age -->
+                            <div class="form-group">
+                                <label for="age">อายุ / Age (ปี)</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="age" name="age" min="15" max="100" value="30" required>
+                                    <span class="input-unit">y/o</span>
+                                </div>
+                            </div>
+
+                            <!-- Weight -->
+                            <div class="form-group">
+                                <label for="weight">น้ำหนัก / Weight (กก.)</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="weight" name="weight" step="0.1" min="30" max="250" value="70" required>
+                                    <span class="input-unit">kg</span>
+                                </div>
+                            </div>
+
+                            <!-- Height -->
+                            <div class="form-group">
+                                <label for="height">ส่วนสูง / Height (ซม.)</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="height" name="height" min="100" max="250" value="175" required>
+                                    <span class="input-unit">cm</span>
+                                </div>
+                            </div>
+
+                            <!-- Body Fat (Optional) -->
+                            <div class="form-group">
+                                <label for="bodyfat">ไขมันสะสม / Body Fat (%) <span class="optional">(ไม่บังคับ)</span></label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="bodyfat" name="bodyfat" min="2" max="60" step="0.1" placeholder="เช่น 15">
+                                    <span class="input-unit">%</span>
+                                </div>
+                            </div>
+
+                            <!-- Activity Level -->
+                            <div class="form-group col-span-2">
+                                <label for="activity">ระดับกิจกรรม / Activity Level</label>
+                                <select id="activity" name="activity" class="form-select">
+                                    <option value="1.2">Sedentary (ทำงานนั่งโต๊ะ แทบไม่ได้ออกกำลังกาย)</option>
+                                    <option value="1.375" selected>Lightly Active (ออกกำลังกายเบาๆ 1-3 วัน/สัปดาห์)</option>
+                                    <option value="1.55">Moderately Active (ออกกำลังกายปานกลาง 3-5 วัน/สัปดาห์)</option>
+                                    <option value="1.725">Very Active (ออกกำลังกายหนัก 6-7 วัน/สัปดาห์)</option>
+                                    <option value="1.9">Extra Active (นักกีฬา หรือทำงานที่ใช้แรงงานหนักมาก)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i data-lucide="sparkles"></i> คำนวณผลลัพธ์ / Calculate
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Trainee History Section -->
+            <section class="history-section no-print">
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <i data-lucide="users" class="text-secondary"></i>
+                        <h2>ประวัติลูกเทรน <span class="subtitle">/ Trainee History</span></h2>
+                    </div>
+                    <div class="history-container">
+                        <div id="history-empty" class="history-empty text-center">
+                            <i data-lucide="folder-open" class="empty-icon text-muted"></i>
+                            <p class="text-muted">ยังไม่มีการบันทึกประวัติลูกเทรน</p>
+                        </div>
+                        <ul id="history-list" class="history-list" style="display: none;">
+                            <!-- Dynamically loaded history items -->
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Results Section (Initially Hidden until calculated) -->
+        <section id="results-section" class="results-section" style="display: none;">
+            <!-- Primary energy cards -->
+            <div class="results-grid">
+                <div class="card glass-card result-summary-card">
+                    <div class="card-body text-center">
+                        <span class="badge badge-primary">TDEE</span>
+                        <h3>พลังงานที่ใช้ต่อวัน</h3>
+                        <p class="subtitle">Maintenance Calories</p>
+                        <div class="calorie-highlight">
+                            <span id="res-tdee">1,914</span>
+                            <span class="unit">kcal / วัน</span>
+                        </div>
+                        <div class="calorie-weekly">
+                            พลังงานต่อสัปดาห์: <strong id="res-tdee-weekly">13,395</strong> kcal
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card glass-card bmr-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-between align-center mb-1">
+                            <div>
+                                <h3>พลังงานพื้นฐาน BMR</h3>
+                                <p class="subtitle">Basal Metabolic Rate</p>
+                            </div>
+                            <span class="badge badge-secondary" id="bmr-formula-badge">Mifflin-St Jeor</span>
+                        </div>
+                        <div class="calorie-highlight small">
+                            <span id="res-bmr">1,392</span>
+                            <span class="unit">kcal</span>
+                        </div>
+                        <p class="desc text-muted">ค่าพลังงานที่ร่างกายต้องการเพื่อมีชีวิตรอดในแต่ละวันขณะพักผ่อน โดยยังไม่รวมการทำกิจกรรมใดๆ</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Analysis Section -->
+            <div class="details-grid mt-2">
+                <!-- Activity Breakdown -->
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <i data-lucide="flame" class="text-warning"></i>
+                        <h3>เปรียบเทียบแต่ละระดับกิจกรรม</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table" id="activity-table">
+                            <thead>
+                                <tr>
+                                    <th>กิจกรรม</th>
+                                    <th class="text-right">พลังงานที่ใช้ (kcal)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="act-row-12">
+                                    <td>Sedentary (แทบไม่ได้ออกกำลังกายเลย)</td>
+                                    <td class="text-right bold" id="act-val-12">0</td>
+                                </tr>
+                                <tr id="act-row-1375">
+                                    <td>Light Exercise (ออกกำลังกายเบาๆ 1-3 วัน)</td>
+                                    <td class="text-right bold" id="act-val-1375">0</td>
+                                </tr>
+                                <tr id="act-row-155">
+                                    <td>Moderate Exercise (ออกกำลังกาย 3-5 วัน)</td>
+                                    <td class="text-right bold" id="act-val-155">0</td>
+                                </tr>
+                                <tr id="act-row-1725">
+                                    <td>Heavy Exercise (ออกกำลังกาย 6-7 วัน)</td>
+                                    <td class="text-right bold" id="act-val-1725">0</td>
+                                </tr>
+                                <tr id="act-row-19">
+                                    <td>Athlete (นักกีฬา / ซ้อมหนัก)</td>
+                                    <td class="text-right bold" id="act-val-19">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Ideal Weight & BMI -->
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <i data-lucide="scale" class="text-success"></i>
+                        <h3>ดัชนีมวลกาย & น้ำหนักที่เหมาะสม</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- BMI Display -->
+                        <div class="bmi-display">
+                            <div class="d-flex justify-between align-center mb-1">
+                                <span class="h4">BMI Score: <strong id="res-bmi" class="text-primary">22.9</strong></span>
+                                <span class="badge" id="res-bmi-status">น้ำหนักปกติ</span>
+                            </div>
+                            <div class="bmi-bar-container">
+                                <div class="bmi-bar">
+                                    <div class="bmi-pointer" id="bmi-pointer"></div>
+                                </div>
+                                <div class="bmi-labels">
+                                    <span>&lt;18.5</span>
+                                    <span>25.0</span>
+                                    <span>30.0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="divider">
+
+                        <!-- Ideal Weight -->
+                        <div class="ideal-weight-display">
+                            <h4>ช่วงน้ำหนักตัวที่เหมาะสม: <strong id="res-ideal-range" class="text-success">60 - 65 กก.</strong></h4>
+                            <p class="desc text-muted mb-1">คำนวณโดยใช้ค่าเฉลี่ยของสูตรสากล (Hamwi, Devine, Robinson และ Miller)</p>
+                            
+                            <details class="ideal-weight-details">
+                                <summary>ดูการคำนวณของแต่ละสูตร</summary>
+                                <table class="table mini-table">
+                                    <tr>
+                                        <td>G.J. Hamwi (1964)</td>
+                                        <td class="text-right bold" id="ideal-hamwi">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>B.J. Devine (1974)</td>
+                                        <td class="text-right bold" id="ideal-devine">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>J.D. Robinson (1983)</td>
+                                        <td class="text-right bold" id="ideal-robinson">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>D.R. Miller (1983)</td>
+                                        <td class="text-right bold" id="ideal-miller">-</td>
+                                    </tr>
+                                </table>
+                            </details>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Martin Berkhan Muscular Potential -->
+            <div class="card glass-card mt-2">
+                <div class="card-header">
+                    <i data-lucide="dumbbell" class="text-danger"></i>
+                    <h3>ขีดจำกัดสูงสุดของมวลกล้ามเนื้อธรรมชาติ <span class="subtitle">/ Maximum Muscular Potential</span></h3>
+                </div>
+                <div class="card-body">
+                    <p class="desc mb-2">ตามสูตรของ Martin Berkhan ประเมินขีดจำกัดสูงสุดที่ร่างกายธรรมชาติจะสามารถสร้างกล้ามเนื้อขึ้นมาได้ที่ระดับเปอร์เซ็นต์ไขมันต่างๆ:</p>
+                    <div class="muscular-grid">
+                        <div class="muscular-item">
+                            <span class="percentage">5% Body Fat</span>
+                            <span class="weight-value" id="musc-5">-- กก.</span>
+                            <span class="label">ระดับลีนแข่งประกวด (Contest Shape)</span>
+                        </div>
+                        <div class="muscular-item">
+                            <span class="percentage">10% Body Fat</span>
+                            <span class="weight-value" id="musc-10">-- กก.</span>
+                            <span class="label">ระดับนายแบบ / ลีนมาก (Lean/Aesthetic)</span>
+                        </div>
+                        <div class="muscular-item">
+                            <span class="percentage">15% Body Fat</span>
+                            <span class="weight-value" id="musc-15">-- กก.</span>
+                            <span class="label">ระดับฟิตแอนด์เฟิร์ม (Fit & Healthy)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Macronutrient Section -->
+            <div class="card glass-card mt-2" id="macros-card">
+                <div class="card-header d-flex justify-between align-center flex-wrap gap-1">
+                    <div class="d-flex align-center">
+                        <i data-lucide="pie-chart" class="text-info"></i>
+                        <h3>สัดส่วนสารอาหาร (Macronutrients)</h3>
+                    </div>
+                    <!-- Calorie Adjuster -->
+                    <div class="calorie-adjuster">
+                        <label for="calorie-offset-range">ปรับเป้าหมายแคลอรี: <strong id="offset-display" class="text-primary">+0 kcal</strong></label>
+                        <div class="adjuster-controls">
+                            <input type="range" id="calorie-offset-range" min="-1000" max="1000" step="50" value="0">
+                            <button id="reset-offset" class="btn btn-outline btn-xs">Reset</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <p class="desc text-muted mb-2">เป้าหมายพลังงานปัจจุบันของคุณสำหรับสัดส่วนด้านล่าง: <strong id="macro-target-calories" class="text-primary">1,914</strong> kcal/วัน</p>
+
+                    <!-- Macro Tabs -->
+                    <div class="tabs">
+                        <button class="tab-btn active" data-goal="maintenance">
+                            <i data-lucide="check-circle2"></i> รักษาน้ำหนัก / Maintenance
+                        </button>
+                        <button class="tab-btn" data-goal="cutting">
+                            <i data-lucide="trending-down"></i> ลดไขมัน / Cutting (-500 kcal)
+                        </button>
+                        <button class="tab-btn" data-goal="bulking">
+                            <i data-lucide="trending-up"></i> เพิ่มกล้ามเนื้อ / Bulking (+500 kcal)
+                        </button>
+                    </div>
+
+                    <!-- Macro Content -->
+                    <div class="macro-splits-grid mt-2">
+                        <!-- Split 1: Moderate Carb -->
+                        <div class="card macro-box-card">
+                            <span class="macro-split-title">Moderate Carb (30/35/35)</span>
+                            <div class="macro-split-body">
+                                <div class="macro-nutrient">
+                                    <div class="macro-info">
+                                        <span class="nutrient-name">โปรตีน (Protein) <small class="ratio">30%</small></span>
+                                        <span class="nutrient-g" id="mod-p-g">143g</span>
+                                    </div>
+                                    <span class="nutrient-cal" id="mod-p-c">572 kcal</span>
+                                </div>
+                                <div class="macro-nutrient">
+                                    <div class="macro-info">
+                                        <span class="nutrient-name">ไขมัน (Fat) <small class="ratio">35%</small></span>
+                                        <span class="nutrient-g" id="mod-f-g">74g</span>
+                                    </div>
+                                    <span class="nutrient-cal" id="mod-f-c">666 kcal</span>
+                                </div>
+                                <div class="macro-nutrient">
+                                    <div class="macro-info">
+                                        <span class="nutrient-name">คาร์บ (Carbs) <small class="ratio">35%</small></span>
+                                        <span class="nutrient-g" id="mod-c-g">167g</span>
+                                    </div>
+                                    <span class="nutrient-cal" id="mod-c-c">668 kcal</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Split 2: Lower Carb -->
+                        <div class="card macro-box-card">
+                            <span class="macro-split-title">Lower Carb (40/40/20)</span>
+                            <div class="macro-split-body">
+                                <div class="macro-nutrient">
+                                    <div class="macro-info">
+                                        <span class="nutrient-name">โปรตีน (Protein) <small class="ratio">40%</small></span>
+                                        <span class="nutrient-g" id="low-p-g">191g</span>
+                                    </div>
+                                    <span class="nutrient-cal" id="low-p-c">764 kcal</span>
+                                </div>
+                                <div class="macro-nutrient">
+                                    <div class="macro-info">
+                                        <span class="nutrient-name">ไขมัน (Fat) <small class="ratio">40%</small></span>
+                                        <span class="nutrient-g" id="low-f-g">85g</span>
+                                    </div>
+                                    <span class="nutrient-cal" id="low-f-c">765 kcal</span>
+                                </div>
+                                <div class="macro-nutrient">
+                                    <div class="macro-info">
+                                        <span class="nutrient-name">คาร์บ (Carbs) <small class="ratio">20%</small></span>
+                                        <span class="nutrient-g" id="low-c-g">96g</span>
+                                    </div>
+                                    <span class="nutrient-cal" id="low-c-c">384 kcal</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Split 3: Higher Carb -->
+                        <div class="card macro-box-card">
+                            <span class="macro-split-title">Higher Carb (30/20/50)</span>
+                            <div class="macro-split-body">
+                                <div class="macro-nutrient">
+                                    <div class="macro-info">
+                                        <span class="nutrient-name">โปรตีน (Protein) <small class="ratio">30%</small></span>
+                                        <span class="nutrient-g" id="high-p-g">143g</span>
+                                    </div>
+                                    <span class="nutrient-cal" id="high-p-c">572 kcal</span>
+                                </div>
+                                <div class="macro-nutrient">
+                                    <div class="macro-info">
+                                        <span class="nutrient-name">ไขมัน (Fat) <small class="ratio">20%</small></span>
+                                        <span class="nutrient-g" id="high-f-g">43g</span>
+                                    </div>
+                                    <span class="nutrient-cal" id="high-f-c">387 kcal</span>
+                                </div>
+                                <div class="macro-nutrient">
+                                    <div class="macro-info">
+                                        <span class="nutrient-name">คาร์บ (Carbs) <small class="ratio">50%</small></span>
+                                        <span class="nutrient-g" id="high-c-g">239g</span>
+                                    </div>
+                                    <span class="nutrient-cal" id="high-c-c">956 kcal</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tracking Tools Card -->
+            <div class="card glass-card mt-2">
+                <div class="card-header">
+                    <i data-lucide="wrench" class="text-secondary"></i>
+                    <h3>3 เครื่องมือสกัดความสำเร็จในการคุมอาหาร <span class="subtitle">/ Calorie Tracking Tools</span></h3>
+                </div>
+                <div class="card-body">
+                    <div class="tools-grid">
+                        <div class="tool-item">
+                            <div class="tool-icon-wrapper">
+                                <i data-lucide="scale-3d" class="text-primary"></i>
+                            </div>
+                            <div class="tool-details">
+                                <h4>เครื่องชั่งอาหาร / Food Scale</h4>
+                                <p class="text-muted">ใช้สำหรับชั่งตวงปริมาณอาหารดิบเพื่อให้คำนวณแคลอรีได้แม่นยำที่สุด ป้องกันการกะปริมาณคลาดเคลื่อน</p>
+                            </div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-icon-wrapper">
+                                <i data-lucide="user" class="text-secondary"></i>
+                            </div>
+                            <div class="tool-details">
+                                <h4>เครื่องชั่งน้ำหนักตัว / Bathroom Scale</h4>
+                                <p class="text-muted">สำหรับชั่งน้ำหนักตัวในช่วงเวลาเดิมหลังตื่นนอน เพื่อนำมาประเมินผลและปรับแผนการกิน</p>
+                            </div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-icon-wrapper">
+                                <i data-lucide="smartphone" class="text-success"></i>
+                            </div>
+                            <div class="tool-details">
+                                <h4>แอปบันทึกพลังงาน / Tracking App</h4>
+                                <p class="text-muted">แนะนำใช้งานแอปบันทึก เช่น MyFitnessPal หรือ Cronometer เพื่อเก็บสถิติการกินในแต่ละวัน</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Supplements Recommendations Card -->
+            <div class="card glass-card mt-2">
+                <div class="card-header">
+                    <i data-lucide="heart-pulse" class="text-danger"></i>
+                    <h3>วิตามินและสารอาหารเสริมแนะนำสำหรับคุณ <span class="subtitle">/ Supplement Recommendations</span></h3>
+                </div>
+                <div class="card-body" id="supplements-content">
+                    <!-- Loaded dynamically via JavaScript based on gender -->
+                </div>
+            </div>
+
+            <!-- Save Trainee to History Panel -->
+            <div class="card glass-card mt-2 no-print">
+                <div class="card-header">
+                    <i data-lucide="save" class="text-secondary"></i>
+                    <h3>บันทึกประวัติลูกเทรนคนนี้ <span class="subtitle">/ Save to History</span></h3>
+                </div>
+                <div class="card-body">
+                    <div class="save-history-form">
+                        <div class="form-group flex-grow">
+                            <label for="trainee-name">ชื่อลูกเทรน / Trainee Name</label>
+                            <div class="input-save-group">
+                                <input type="text" id="trainee-name" class="form-control" placeholder="ระบุชื่อลูกเทรน เช่น คุณสมชาย">
+                                <button type="button" id="btn-save-history" class="btn btn-secondary">
+                                    <i data-lucide="user-plus"></i> บันทึกข้อมูล / Save Trainee
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export and Trainer Sharing Options -->
+            <div class="action-bar mt-2 no-print">
+                <button id="btn-print" class="btn btn-secondary">
+                    <i data-lucide="printer"></i> พิมพ์ / เซฟ PDF รายงานนี้
+                </button>
+                <button id="btn-share" class="btn btn-outline">
+                    <i data-lucide="share-2"></i> คัดลอกลิงก์ผลลัพธ์เพื่อแชร์
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer no-print">
+        <div class="container text-center">
+            <p>&copy; 2026 Coach TDEE Pro. ออกแบบมาสำหรับเทรนเนอร์และคนรักสุขภาพ</p>
+            <p class="text-muted small">สูตรการคำนวณอ้างอิงมาตรฐานสากล: Mifflin-St Jeor, Katch-McArdle, และ Martin Berkhan</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
